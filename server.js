@@ -12,20 +12,16 @@ const client = new OpenAI({
 });
 
  app.get('/api/getRecipes', async (req, res) => {
-  console.log("REq: ", req.query.search);
+  
   const  query  = req.query.search;
-  console.log(query)
-
-  console.log('query:', query);
   
   try {
     const aiResponse = await client.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'user',
-          content: `Provide a list of 5 recipes for "${query}". Each recipe should be in JSON format with the following fields: name, prepTime, ingredients (as an array), and instructions (as an array). Return only vald JSON.`,
-        //    content: 'Say this is a test'
+          content: `Provide a list of 5 recipes for "${query}". Each recipe should be in JSON format with the following fields: name, prepTime, ingredients (as an array), and instructions (as an array). Return only valid pure JSON format.`,
         },
       ],
     temperature: 0.0,
@@ -33,10 +29,9 @@ const client = new OpenAI({
     
 });
 
-    const textResponse = aiResponse.choices[0].message.content
-    console.log('textResponse:', textResponse);
-    const recipes = JSON.parse(textResponse);
-
+    const textResponse = aiResponse.choices[0].message.content;
+    const cleanedResponse = textResponse.replace(/```|json/g, '');
+    const recipes = JSON.parse(cleanedResponse);
     res.json({ recipes });
   } catch (error) {
     console.error('Error fetching recipes:', error);
